@@ -1,224 +1,438 @@
-# Data Engineering Zoomcamp
+docker run -it ubuntu bash
+ubuntu - image
+-it - interactive mode
+bash - commant that should execute this image (all after image is parameter)
 
+docker run -it python:3.9 - run image python:3.9
 
-<p align="center">
-  <a href="https://airtable.com/shr6oVXeQvSI5HuWD"><img src="https://user-images.githubusercontent.com/875246/185755203-17945fd1-6b64-46f2-8377-1011dcb1a444.png" height="50" /></a>
-</p>
+CTRL+D - exit from python prompt (and install pandas)
 
-- Register in [DataTalks.Club's Slack](https://datatalks.club/slack.html)
-- Join the [`#course-data-engineering`](https://app.slack.com/client/T01ATQK62F8/C01FABYF2RG) channel
-- Join the [course Telegram channel with announcements](https://t.me/dezoomcamp)
-- The videos are published on [DataTalks.Club's YouTube channel](https://www.youtube.com/c/DataTalksClub) in [the course playlist](https://www.youtube.com/playlist?list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb)
-- [Frequently asked technical questions](https://docs.google.com/document/d/19bnYs80DwuUimHM65UV3sylsCn2j1vziPOwzBwQrebw/edit?usp=sharing)
+--pip install pandas - not here
+-- we want to overwrite entry point - what exactly will be executed when we run entrypoint
+docker run -it --entrypoint=bash python:3.9
 
-Syllabus
+-- now instead of python prompt we have a bash prompt
 
-* [Week 1: Introduction & Prerequisites](#week-1-introduction--prerequisites)
-* [Week 2: Workflow Orchestration](#week-2-workflow-orchestration)
-* [Week 3: Data Warehouse](#week-3-data-warehouse)
-* [Week 4: Analytics Engineering](#week-4-analytics-engineering)
-* [Week 5: Batch processing](#week-5-batch-processing)
-* [Week 6: Streaming](#week-6-streaming)
-* [Week 7, 8 & 9: Project](#week-7-8--9-project)
+pip install pandas - in a specific container
 
-## Taking the course
+#python - to execute here
 
-### 2023 Cohort
+import pandas - now it works
+pandas.__version__
 
-* **Start**: 16 January 2023 (Monday) at 18:00 CET
-* **Registration link**: https://airtable.com/shr6oVXeQvSI5HuWD
-* Subscribe to our [public Google Calendar](https://calendar.google.com/calendar/?cid=ZXIxcjA1M3ZlYjJpcXU0dTFmaG02MzVxMG9AZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ) (it works from Desktop only)
-* [Cohort folder](cohorts/2023/) with homeworks and deadlines 
+Dockerfile - has all info that we need when run image
 
-### Self-paced mode
+# docker build command builds an image from dockerfile
 
-All the materials of the course are freely available, so that you
-can take the course at your own pace
+docker build -t test:pandas .
 
-* Follow the suggested syllabus (see below) week by week
-* You don't need to fill in the registration form. Just start watching the videos and join Slack
-* Check [FAQ](https://docs.google.com/document/d/19bnYs80DwuUimHM65UV3sylsCn2j1vziPOwzBwQrebw/edit?usp=sharing) if you have problems
-* If you can't find a solution to your problem in FAQ, ask for help in Slack
+# docker run command
+docker run -it test:pandas
 
+docker run -it test:pandas 2023-01-27 - how we can parametrize data pipeline script
 
+# 2.cas
 
-### Asking for help in Slack
+#docker-compose -f img.yaml up - da se run-uje docker compose, u mom slucaju
 
-The best way to get support is to use [DataTalks.Club's Slack](https://datatalks.club/slack.html). Join the [`#course-data-engineering`](https://app.slack.com/client/T01ATQK62F8/C01FABYF2RG) channel.
+docker-compose -f docker-compose.yaml up 
 
-To make discussions in Slack more organized:
+# Changing `POSTGRES_USER=root` to `PGUSER=postgres` ! ? ne radi
 
-* Follow [these recommendations](asking-questions.md) when asking for help
-* Read the [DataTalks.Club community guidelines](https://datatalks.club/slack/guidelines.html)
 
+services:
+  pgdatabase:
+    image: postgres:13
+    environment:
+      - POSTGRES_USER: airflow
+      - POSTGRES_PASSWORD: airflow
+      - POSTGRES_DB: airflow
+    volumes:
+      - postgres-db-volume:/var/lib/postgresql/data
+  healthcheck:
+			test: ["CMD", "pg_isready", "-U", "airflow"]
+			interval: 5s
+			retries: 5
+		restart: always
+    
+# use to setup postgre and to get that database sys is ready to accept connection
+docker run -it \
+      -e POSTGRES_USER="root" \
+      -e POSTGRES_PASSWORD="root" \
+      -e POSTGRES_DB="ny_taxi" \
+      -v //c/DE_Zoomcamp/data-engineering-zoomcamp-main/week_1_basics_n_setup/2_docker_sql/ny_taxi_postgres_data:/var/lib/postgresql/data \
+      -p 5432:5432 \
+      postgres:13
+      
+# try to access the database
+pgcli - lib in python
 
-## Syllabus
+pip install pgcli
 
-> **Note:** NYC TLC changed the format of the data we use to parquet. But you can still access
-> the csv files [here](https://github.com/DataTalksClub/nyc-tlc-data).
+pgcli -h localhost -p 5432 -u root -d ny_taxi
 
-### [Week 1: Introduction & Prerequisites](week_1_basics_n_setup)
+\dt - list of tables
 
-* Course overview
-* Introduction to GCP
-* Docker and docker-compose
-* Running Postgres locally with Docker
-* Setting up infrastructure on GCP with Terraform
-* Preparing the environment for the course
-* Homework
+# in new terminal want to instal jupiter - to inster queries in db
 
-[More details](week_1_basics_n_setup)
+jupyter notebook - to run it
 
+# in new terminal insert correct link for 2023
 
-### [Week 2: Workflow Orchestration](week_2_workflow_orchestration/)
+python -m wget https://github.com/DataTalksClub/nyc-tlc-data/releases/download/yellow/yellow_tripdata_2021-01.csv.gz
 
-* Data Lake
-* Workflow orchestration
-* Introduction to Prefect
-* ETL with GCP & Prefect
-* Parametrizing workflows
-* Prefect Cloud and additional resources
-* Homework
+# homework
+# python -m wget https://github.com/DataTalksClub/nyc-tlc-data/releases/download/green/green_tripdata_2019-01.csv.gz   //630918
+# python -m wget https://s3.amazonaws.com/nyc-tlc/misc/taxi+_zone_lookup.csv - ne radi
+# python -m wget https://github.com/DataTalksClub/nyc-tlc-data/releases/download/misc/taxi_zone_lookup.csv     //265
 
-[More details](week_2_workflow_orchestration/)
+cp ~/tmp/pg-test/yellow_tripdata_2021-01.csv .
 
+q - da izadjem iz naredbe za citanje less (ne radi sa zippom)
 
-### [Week 3: Data Warehouse](week_3_data_warehouse)
+less yellow_tripdata_2021-01.csv.gz
 
+head -n 100 yellow_tripdata_2021-01.csv > yellow_head.csv   // read first 100 rows and save as a new .csv file
 
-* Data Warehouse
-* BigQuery
-* Partitioning and clustering
-* BigQuery best practices
-* Internals of BigQuery
-* Integrating BigQuery with Airflow
-* BigQuery Machine Learning
+wc -l yellow_tripdata_2021-01.csv  // count
 
-[More details](week_3_data_warehouse)
+# --- u browseru
 
+import pandas as pd
 
-### [Week 4: Analytics engineering](week_4_analytics_engineering/)
+df=pd.read_csv('yellow_tripdata_2021-01.csv',nrows=100)
 
-* Basics of analytics engineering
-* dbt (data build tool)
-* BigQuery and dbt
-* Postgres and dbt
-* dbt models
-* Testing and documenting
-* Deployment to the cloud and locally
-* Visualizing the data with google data studio and metabase
+df
 
+df.tpep_pickup_datetime = pd.to_datetime(df.tpep_pickup_datetime)   // change data types
+df.tpep_dropoff_datetime = pd.to_datetime(df.tpep_dropoff_datetime)
 
-[More details](week_4_analytics_engineering)
+print(pd.io.sql.get_schema(df, name='yellow_taxi_data'))   // get ddl
 
 
-### [Week 5: Batch processing](week_5_batch_processing)
+// create connection to postgres
+// pandas use sqlalchemy
 
-* Batch processing
-* What is Spark
-* Spark Dataframes
-* Spark SQL
-* Internals: GroupBy and joins
 
-[More details](week_5_batch_processing)
 
-### [Week 6: Streaming](week_6_stream_processing)
 
-* Introduction to Kafka
-* Schemas (avro)
-* Kafka Streams
-* Kafka Connect and KSQL
+python ingest_data.py \
+    --user=root \
+    --password=root \
+    --host=localhost \
+    --port=5432 \
+    --db=ny_taxi \
+    --table_name=yellow_taxi_data \
+    --url="https://github.com/DataTalksClub/nyc-tlc-data/releases/download/misc/taxi_zone_lookup.csv"
 
-[More details](week_6_stream_processing)
 
+os.system(f " wget https://github.com/DataTalksClub/nyc-tlc-data/releases/download/yellow/yellow_tripdata_2021-01.csv.gz -O output.csv")
 
-### [Week 7, 8 & 9: Project](week_7_project)
+## Docker and SQL
 
-Putting everything we learned to practice
+Notes I used for preparing the videos: [link](https://docs.google.com/document/d/e/2PACX-1vRJUuGfzgIdbkalPgg2nQ884CnZkCg314T_OBq-_hfcowPxNIA0-z5OtMTDzuzute9VBHMjNYZFTCc1/pub)
 
-* Week 7 and 8: working on your project
-* Week 9: reviewing your peers
 
-[More details](week_7_project)
+## Commands 
 
+All the commands from the video
 
-## Overview
+Downloading the data
 
-### Architecture diagram
-<img src="images/architecture/arch_2.png"/>
+```bash
+wget https://s3.amazonaws.com/nyc-tlc/csv_backup/yellow_tripdata_2021-01.csv
+```
 
-### Technologies
-* *Google Cloud Platform (GCP)*: Cloud-based auto-scaling platform by Google
-  * *Google Cloud Storage (GCS)*: Data Lake
-  * *BigQuery*: Data Warehouse
-* *Terraform*: Infrastructure-as-Code (IaC)
-* *Docker*: Containerization
-* *SQL*: Data Analysis & Exploration
-* *Prefect*: Workflow Orchestration
-* *dbt*: Data Transformation
-* *Spark*: Distributed Processing
-* *Kafka*: Streaming
+> Note: now the CSV data is stored in the `csv_backup` folder, not `trip+date` like previously
 
+### Running Postgres with Docker
 
-### Prerequisites
+#### Windows
 
-To get the most out of this course, you should feel comfortable with coding and command line
-and know the basics of SQL. Prior experience with Python will be helpful, but you can pick
-Python relatively fast if you have experience with other programming languages.
+Running Postgres on Windows (note the full path)
 
-Prior experience with data engineering is not required.
+```bash
+docker run -it \
+  -e POSTGRES_USER="root" \
+  -e POSTGRES_PASSWORD="root" \
+  -e POSTGRES_DB="ny_taxi" \
+  -v c:/Users/alexe/git/data-engineering-zoomcamp/week_1_basics_n_setup/2_docker_sql/ny_taxi_postgres_data:/var/lib/postgresql/data \
+  -p 5432:5432 \
+  postgres:13
+```
 
+If you have the following error:
 
+```
+docker run -it \
+  -e POSTGRES_USER="root" \
+  -e POSTGRES_PASSWORD="root" \
+  -e POSTGRES_DB="ny_taxi" \
+  -v e:/zoomcamp/data_engineer/week_1_fundamentals/2_docker_sql/ny_taxi_postgres_data:/var/lib/postgresql/data  \
+  -p 5432:5432 \
+  postgres:13
 
-## Instructors
+-- JS ispravan
+winpty docker run -it \
+  -e POSTGRES_USER="root" \
+  -e POSTGRES_PASSWORD="root" \
+  -e POSTGRES_DB="ny_taxi" \
+  -v //c/DE_Zoomcamp/data-engineering-zoomcamp-main/week_1_basics_n_setup/2_docker_sql/ny_taxi_postgres_data:/var/lib/postgresql/data \
+  -p 5432:5432 \
+  postgres:13
 
-- Ankush Khanna (https://linkedin.com/in/ankushkhanna2)
-- Sejal Vaidya (https://linkedin.com/in/vaidyasejal)
-- Victoria Perez Mola (https://www.linkedin.com/in/victoriaperezmola/)
-- Kalise Richmond (https://www.linkedin.com/in/kaliserichmond/)
-- Jeff Hale (https://www.linkedin.com/in/-jeffhale/)
-- Alexey Grigorev (https://linkedin.com/in/agrigorev)
+-- bash 1
+  winpty docker run -it \
+  -e POSTGRES_USER="root" \
+  -e POSTGRES_PASSWORD="root" \
+  -e POSTGRES_DB="ny_taxi" \
+  -v //c/DE_Zoomcamp/data-engineering-zoomcamp-main/week_1_basics_n_setup/2_docker_sql/ny_taxi_postgres_data:/var/lib/postgresql/data \
+  -p 5432:5432 \
+  --network=pg-network \
+  --name pgdatabase \
+  postgres:13
 
-## Tools
+-- bash 2
+winpty docker run -it \
+  -e PGADMIN_DEFAULT_EMAIL="admin@admin.com" \
+  -e PGADMIN_DEFAULT_PASSWORD="root" \
+  -p 8080:80 \
+  --network=pg-network \
+  --name pgadmin \
+  dpage/pgadmin4
 
-For this course, you'll need to have the following software installed on your computer:
 
-* Docker and Docker-Compose
-* Python 3 (e.g. via [Anaconda](https://www.anaconda.com/products/individual))
-* Google Cloud SDK
-* Terraform
 
-See [Week 1](week_1_basics_n_setup) for more details about installing these tools
+docker: Error response from daemon: invalid mode: \Program Files\Git\var\lib\postgresql\data.
+See 'docker run --help'.
+```
 
+Change the mounting path. Replace it with the following:
 
+```
+-v /e/zoomcamp/...:/var/lib/postgresql/data
+```
 
-## FAQ
+#### Linux and MacOS
 
 
-* **Q**: I registered, but haven't received a confirmation email. Is it normal?
-  **A**: Yes, it's normal. It's not automated. But you will receive an email eventually.
-* **Q**: At what time of the day will it happen?
-  **A**: Office hours will happen on Mondays at 17:00 CET. But everything will be recorded, so you can watch it whenever it's convenient for you.
-* **Q**: Will there be a certificate?
-  **A**: Yes, if you complete the project.
-* **Q**: I'm 100% not sure I'll be able to attend. Can I still sign up?
-  **A**: Yes, please do! You'll receive all the updates and then you can watch the course at your own pace.
-* **Q**: Do you plan to run a ML engineering course as well?
-**A**: Glad you asked. [We do](https://github.com/alexeygrigorev/mlbookcamp-code/tree/master/course-zoomcamp) :)
-* **Q**: I'm stuck! I've got a technical question!
-  **A**: Ask on Slack! And check out the [student FAQ](https://docs.google.com/document/d/19bnYs80DwuUimHM65UV3sylsCn2j1vziPOwzBwQrebw/edit?usp=sharing); many common issues have been answered already. If your issue is solved, please add how you solved it to the document. Thanks!
+```bash
+docker run -it \
+  -e POSTGRES_USER="root" \
+  -e POSTGRES_PASSWORD="root" \
+  -e POSTGRES_DB="ny_taxi" \
+  -v $(pwd)/ny_taxi_postgres_data:/var/lib/postgresql/data \
+  -p 5432:5432 \
+  postgres:13
+```
 
+If you see that `ny_taxi_postgres_data` is empty after running
+the container, try these:
 
+* Deleting the folder and running Docker again (Docker will re-create the folder)
+* Adjust the permissions of the folder by running `sudo chmod a+rwx ny_taxi_postgres_data`
 
-## Supporters and partners
 
-Thanks to the course sponsors for making it possible to create this course
+### CLI for Postgres
 
-<p align="center">
-  <a href="https://www.prefect.io/">
-    <img height="100" src="https://github.com/DataTalksClub/mlops-zoomcamp/raw/main/images/prefect.png">
-  </a>
-</p>
+Installing `pgcli`
 
-Do you want to support our course and our community? Please reach out to [alexey@datatalks.club](alexey@datatalks.club)
+```bash
+pip install pgcli
+```
 
+If you have problems installing `pgcli` with the command above, try this:
+
+```bash
+conda install -c conda-forge pgcli
+pip install -U mycli
+```
+
+Using `pgcli` to connect to Postgres
+
+```bash
+pgcli -h localhost -p 5432 -u root -d ny_taxi
+```
+
+
+### NY Trips Dataset
+
+Dataset:
+
+* https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page
+* https://www1.nyc.gov/assets/tlc/downloads/pdf/data_dictionary_trip_records_yellow.pdf
+
+> According to the [TLC data website](https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page),
+> from 05/13/2022, the data will be in ```.parquet``` format instead of ```.csv```
+> The website has provided a useful [link](https://www1.nyc.gov/assets/tlc/downloads/pdf/working_parquet_format.pdf) with sample steps to read ```.parquet``` file and convert it to Pandas data frame.
+>
+> You can use the csv backup located here, https://github.com/DataTalksClub/nyc-tlc-data/releases/download/yellow/yellow_tripdata_2021-01.csv.gz, to follow along with the video.
+```
+$ aws s3 ls s3://nyc-tlc
+                           PRE csv_backup/
+                           PRE misc/
+                           PRE trip data/
+```
+
+### pgAdmin
+
+Running pgAdmin
+
+```bash
+docker run -it \
+  -e PGADMIN_DEFAULT_EMAIL="admin@admin.com" \
+  -e PGADMIN_DEFAULT_PASSWORD="root" \
+  -p 8080:80 \
+  dpage/pgadmin4
+```
+
+### Running Postgres and pgAdmin together
+
+Create a network
+
+```bash
+docker network create pg-network
+```
+
+Run Postgres (change the path)
+
+```bash
+docker run -it \
+  -e POSTGRES_USER="root" \
+  -e POSTGRES_PASSWORD="root" \
+  -e POSTGRES_DB="ny_taxi" \
+  -v c:/Users/alexe/git/data-engineering-zoomcamp/week_1_basics_n_setup/2_docker_sql/ny_taxi_postgres_data:/var/lib/postgresql/data \
+  -p 5432:5432 \
+  --network=pg-network \
+  --name pg-database \
+  postgres:13
+```
+
+Run pgAdmin
+
+```bash
+docker run -it \
+  -e PGADMIN_DEFAULT_EMAIL="admin@admin.com" \
+  -e PGADMIN_DEFAULT_PASSWORD="root" \
+  -p 8080:80 \
+  --network=pg-network \
+  --name pgadmin-2 \
+  dpage/pgadmin4
+```
+
+
+### Data ingestion
+
+Running locally
+
+```bash
+URL="https://github.com/DataTalksClub/nyc-tlc-data/releases/download/yellow/yellow_tripdata_2021-01.csv.gz"
+
+python ingest_data.py \
+  --user=root \
+  --password=root \
+  --host=localhost \
+  --port=5432 \
+  --db=ny_taxi \
+  --table_name=yellow_taxi_trips \
+  --url=${URL}
+```
+
+Build the image
+
+```bash
+
+
+```
+
+On Linux you may have a problem building it:
+
+```
+error checking context: 'can't stat '/home/name/data_engineering/ny_taxi_postgres_data''.
+```
+
+You can solve it with `.dockerignore`:
+
+* Create a folder `data`
+* Move `ny_taxi_postgres_data` to `data` (you might need to use `sudo` for that)
+* Map `-v $(pwd)/data/ny_taxi_postgres_data:/var/lib/postgresql/data`
+* Create a file `.dockerignore` and add `data` there
+* Check [this video](https://www.youtube.com/watch?v=tOr4hTsHOzU&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb) (the middle) for more details 
+
+
+
+Run the script with Docker
+
+```bash
+URL="https://github.com/DataTalksClub/nyc-tlc-data/releases/download/yellow/yellow_tripdata_2021-01.csv.gz"
+
+docker run -it \
+  --network=pg-network \
+  taxi_ingest:v001 \
+    --user=root \
+    --password=root \
+    --host=pg-database \
+    --port=5432 \
+    --db=ny_taxi \
+    --table_name=yellow_taxi_trips \
+    --url=${URL}
+```
+
+--JS
+
+docker build -t taxi_ingest:v001 .
+
+docker run -it \
+  --network=pg-network \
+  taxi_ingest:v001 \
+    --user=root \
+    --password=root \
+    --host=pgdatabase \
+    --port=5432 \
+    --db=ny_taxi \
+    --table_name=green_taxi_trips \
+    --url=${URL}
+
+
+
+### Docker-Compose 
+
+Run it:
+
+```bash
+docker-compose up
+```
+
+Run in detached mode:
+
+```bash
+docker-compose up -d
+```
+
+Shutting it down:
+
+```bash
+docker-compose down
+```
+
+Note: to make pgAdmin configuration persistent, create a folder `data_pgadmin`. Change its permission via
+
+```bash
+sudo chown 5050:5050 data_pgadmin
+```
+
+and mount it to the `/var/lib/pgadmin` folder:
+
+```yaml
+services:
+  pgadmin:
+    image: dpage/pgadmin4
+    volumes:
+      - ./data_pgadmin:/var/lib/pgadmin
+    ...
+```
+
+
+### SQL 
+
+Coming soon!
